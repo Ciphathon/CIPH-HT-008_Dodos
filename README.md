@@ -80,7 +80,7 @@ flowchart LR
     R --> S[Local Activity Logs]
 ```
 
-### 🧠 The 4-Layer Text Pipeline 
+###  The 4-Layer Text Pipeline 
 
 Most basic security tools just parse raw text using standard Regex. That creates massive false positives or completely misses modern cryptographic tokens. Instead, GuardOWL pipes every single payload right here through a rigorous 4-Layer waterfall.
 
@@ -115,7 +115,7 @@ flowchart TD
     Sanitizer --> Output["Final Verdict:<br>Block / Mask / Allow"]
 ```
 
-### 👁️ The Image OCR Pipeline
+###  The Image OCR Pipeline
 Paste a screenshot of an API key or a photo of a PAN card?
 1. **Canvas Preprocessing:** Image is drawn onto an HTML5 canvas where we manipulate the `Uint8ClampedArray` to apply Grayscale scaling, Histogram Contrast Stretching, and Adaptive Binary Thresholding to strip out background noise/watermarks.
 2. **Multi-Pass OCR:** Original and preprocessed images are sent to our **Offscreen Document**.
@@ -206,7 +206,7 @@ guardowl/
 
 ---
 
-## Team
+## Team Dodos
 
 Built at **Ciphathon 26'** · MIT World Peace University, Pune  
 Domain: Privacy-First Applications
