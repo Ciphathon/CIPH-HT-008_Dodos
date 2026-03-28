@@ -1,9 +1,10 @@
-# 🦉 GuardOWL
+<p align="center">
+  <img src="icons/icon128.png" width="128" alt="GuardOWL Logo">
+</p>
+
+# GuardOWL
 ### On-device Watchdog for LLMs
 **Observe · Warn · Lock**
-
-> *"Nightfall AI makes $35M/year scanning your sensitive data on their servers.  
-> GuardOWL protects you without ever seeing your data — because privacy IS the product."*
 
 ---
 
@@ -18,15 +19,13 @@ Built in 24 hours at **Ciphathon 26'** — National Cybersecurity Hackathon, MIT
 
 ## The Problem
 
-In 2023, Samsung engineers leaked proprietary source code by pasting it into ChatGPT.  
-Cyberhaven research shows **11% of all employee AI pastes contain confidential data**.  
-IBM puts the average breach cost at **$4.45M**.
+### Statement: Browser-Level Sensitive Data Leakage Prevention from LLMs
+
+In 2023, Samsung engineers leaked proprietary source code by pasting it into ChatGPT. Cyberhaven research shows **11% of all employee AI pastes contain confidential data**.  IBM puts the average breach cost at **$4.45M**.
 
 400M+ people use AI tools daily. **Zero of them have on-device DLP protection.**
 
-Enterprise tools like Nightfall AI ($3K–$15K/month) scan your data on *their* servers.  
-Cyberhaven requires an IT-deployed endpoint agent.  
-Neither works for individual users, students, developers, or small teams.
+Enterprise tools like Nightfall AI ($3K–$15K/month) scan your data on *their* servers.  Cyberhaven requires an IT-deployed endpoint agent.  Neither works for individual users, students, developers, or small teams.
 
 **GuardOWL does.**
 
@@ -50,7 +49,7 @@ GuardOWL content script intercepts the DOM event (keyup, paste, drop, form click
 1. **Context-Aware Regex:** 15+ patterns catch standard tokens (`sk-`, `AKIA`).
 2. **Shannon Entropy Validation:** Mathematical randomness checks to find unknown secrets/hashes.
 3. **Context Window:** Scans for anchors (`password=`, `token:`) right next to high-entropy strings.
-4. **NLP Entity Extraction:** Bundled `compromise.js` detects structural lists of Human Names, Organizations, and Phone Numbers.
+4. **NLP Entity Extraction:** Bundled `compromise.min.js` detects structural lists of Human Names, Organizations, and Phone Numbers.
 
 ### The Image OCR Pipeline
 Paste a screenshot of an API key or a photo of a PAN card?
@@ -77,22 +76,27 @@ If PII is found, a 100% native UI modal appears with choices to **Remove**, **Ma
 
 ## Supported Platforms
 
+**Primary Targets (AI Chatbots):**
 - ChatGPT (chatgpt.com)
 - Claude (claude.ai)
 - Google Gemini (gemini.google.com)
 - Microsoft Copilot (copilot.microsoft.com)
 - Bing AI (bing.com)
 
+**Experimental Coverage (Opt-in via Settings):**
+- **Gmail (mail.google.com)**: On-the-fly scanning in the email compose box to intercept accidental PII transmission over email.
+- **Google Search (www.google.com)**: Inline warning detection directly below the Google Search bar to catch unintentional query leaks.
+
 ---
 
 ## Installation (Developer Mode)
 
-1. Download and unzip `GuardOWL_Extension.zip`
+1. Download and unzip `GuardOWL_Extension.zip` (or clone the repository)
 2. Open Chrome → go to `chrome://extensions`
 3. Enable **Developer mode** (toggle, top right)
 4. Click **Load unpacked**
-5. Select the `guardowl/` folder
-6. Pin GuardOWL to your toolbar
+5. Select the repository folder (or the `dist/` folder for the obfuscated production build)
+6. Pin GuardOWL to your toolbar!
 
 ---
 
@@ -131,7 +135,7 @@ guardowl/
 
 | | Nightfall AI ($$M) | Cyberhaven (Enterprise) | GuardOWL (Edge DLP) |
 |---|---|---|---|
-| Detection location | Their cloud server ☁️ | Their cloud server ☁️ | **Your device sandbox ✓** |
+| Detection location | Their cloud server  | Their cloud server  | **Your device sandbox ✓** |
 | Sees your true data | Yes | Yes | **Never** |
 | Target demographic | InfoSec IT Admins | Enterprise Endpoints | **Individuals & Devs ✓** |
 | Installation | Network routing setup | Root-level IT agent | **30 second extension ✓** |
@@ -142,7 +146,3 @@ guardowl/
 
 Built at **Ciphathon 26'** · MIT World Peace University, Pune  
 Domain: Privacy-First Applications
-
-## License
-
-MIT — open source, free to use, free to extend.
