@@ -1,19 +1,9 @@
-
-
-
-
-
 let tesseractWorker = null;
 let tesseractReady = false;
 let initError = null;
 
-
 (async function autoInit() {
   try {
-    console.log("[GuardOWL Offscreen] Initializing Tesseract...");
-
-    
-    
     tesseractWorker = await Tesseract.createWorker("eng", 1, {
       workerPath: chrome.runtime.getURL("tesseract.worker.min.js"),
       workerBlobURL: false,
@@ -21,12 +11,9 @@ let initError = null;
       langPath: "https://tessdata.projectnaptha.com/4.0.0",
       cacheMethod: "none"
     });
-
     tesseractReady = true;
-    console.log("[GuardOWL Offscreen] Tesseract ready!");
   } catch (err) {
     initError = err.message;
-    console.error("[GuardOWL Offscreen] Tesseract init error:", err);
   }
 })();
 
@@ -36,18 +23,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "INIT_OCR") {
     if (tesseractReady) {
       sendResponse({ ok: true });
-    } else if (initError) {
-      sendResponse({ ok: false, error: initError });
     } else {
-      
-      let elapsed = 0;
-      const poll = setInterval(() => {
-        elapsed += 500;
+      let waited = 0;
+      const checker = setInterval(() => {
+        waited += 500;
         if (tesseractReady) {
-          clearInterval(poll);
+          clearInterval(checker);
           sendResponse({ ok: true });
-        } else if (initError || elapsed > 30000) {
-          clearInterval(poll);
+        } else if (initError || waited > 30000) {
+          clearInterval(checker);
           sendResponse({ ok: false, error: initError || "Timeout" });
         }
       }, 500);

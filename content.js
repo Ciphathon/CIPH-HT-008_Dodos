@@ -1,50 +1,22 @@
-
 (function () {
   "use strict";
 
-  let isModalOpen = false;
+  let isModalOpen  = false;
   let skipNextScan = false;
 
-  
-  let userSettings = {
-    sensitivity: "balanced",
-    disabledPatterns: ["email", "ifsc_code", "ipv4_private"], 
-    whitelist: [],
-    autoPurge: true,
-    ocrEnabled: true
-  };
-
-  
-  chrome.storage.sync.get("gow_settings", (data) => {
-    if (data.gow_settings) userSettings = { ...userSettings, ...data.gow_settings };
-  });
-
   const SITE_CONFIGS = {
-    "chatgpt.com": { input: "#prompt-textarea", submit: '[data-testid="send-button"]' },
-    "chat.openai.com": { input: "#prompt-textarea", submit: '[data-testid="send-button"]' },
-    "claude.ai": { input: ".ProseMirror", submit: '[aria-label="Send message"]' },
-    "gemini.google.com": { input: ".ql-editor", submit: '.send-button' },
-    "copilot.microsoft.com": { input: "#userInput", submit: '[aria-label="Submit"]' },
-    "www.bing.com": { input: "#searchbox", submit: '#search_icon' },
-    "mail.google.com": { input: ".Am.Al.editable", submit: '[data-tooltip="Send"], [aria-label="Send"]' },
-    "www.google.com": { input: 'textarea[name="q"], input[name="q"]', submit: 'input[name="btnK"], [aria-label="Google Search"]' }
+    "chatgpt.com":          { input: "#prompt-textarea",         submit: '[data-testid="send-button"]' },
+    "chat.openai.com":      { input: "#prompt-textarea",         submit: '[data-testid="send-button"]' },
+    "claude.ai":            { input: ".ProseMirror",             submit: '[aria-label="Send message"]' },
+    "gemini.google.com":    { input: ".ql-editor",               submit: '.send-button' },
+    "copilot.microsoft.com":{ input: "#userInput",               submit: '[aria-label="Submit"]' },
+    "www.bing.com":         { input: "#searchbox",               submit: '#search_icon' }
   };
 
   const hostname = window.location.hostname;
-  const config = SITE_CONFIGS[hostname];
+  const config   = SITE_CONFIGS[hostname];
 
-  function isWhitelisted() {
-    return (userSettings.whitelist || []).some(domain => hostname.includes(domain.trim()));
-  }
-
-  
-  function isSiteDisabled() {
-    if (hostname === "mail.google.com" && !userSettings.gmailEnabled) return true;
-    if (hostname === "www.google.com" && !userSettings.googleSearchEnabled) return true;
-    return false;
-  }
-
-  function getInputEl() { return config ? document.querySelector(config.input) : null; }
+  function getInputEl()   { return config ? document.querySelector(config.input) : null; }
   function getSubmitBtn() { return config ? document.querySelector(config.submit) : null; }
 
   function getInputText() {
@@ -59,11 +31,7 @@
       document.execCommand("selectAll", false, null);
       document.execCommand("insertText", false, text);
     } else {
-      
-      const proto = el.tagName === "TEXTAREA"
-        ? window.HTMLTextAreaElement.prototype
-        : window.HTMLInputElement.prototype;
-      const setter = Object.getOwnPropertyDescriptor(proto, "value").set;
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
       setter.call(el, text);
       el.dispatchEvent(new Event("input", { bubbles: true }));
     }
@@ -81,6 +49,7 @@
     setTimeout(() => { skipNextScan = false; }, 300);
   }
 
+
   let inlineBarFindings = null;
   let repositionRAF = null;
 
@@ -91,15 +60,15 @@
     const bar = document.createElement("div");
     bar.id = "gow-inline-warning";
 
-    const labels = [...new Set(findings.map(f => f.label))].join(" · ");
+    const labels  = [...new Set(findings.map(f => f.label))].join(" · ");
     const severity = findings[0]?.severity;
-    const colors = { critical: "#FF4444", high: "#FF9500", medium: "#FFD60A", low: "#8E8E93" };
-    const color = colors[severity] || "#FF9500";
+    const colors  = { critical: "#FF4444", high: "#FF9500", medium: "#FFD60A", low: "#8E8E93" };
+    const color   = colors[severity] || "#FF9500";
 
     bar.style.cssText = `
       position: fixed;
-      background: #1A1A22;
-      border: 1.5px solid ${color};
+      background: ${color}18;
+      border: 1px solid ${color}55;
       border-radius: 8px;
       color: ${color};
       font-family: -apple-system, sans-serif;
@@ -111,38 +80,24 @@
       align-items: center;
       gap: 7px;
       pointer-events: none;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+      transition: top 0.1s;
     `;
-    bar.innerHTML = `🦉GuardOWL: <strong>${labels}</strong> detected — will intercept on send`;
+    bar.innerHTML = `<span style="font-size:14px">🦉</span> GuardOWL: <strong>${labels}</strong> detected — will intercept on send`;
     document.body.appendChild(bar);
 
-    
-    
-    const showBelow = hostname === "www.google.com";
+    // Position + reposition on scroll/resize
     function positionBar() {
       const el = getInputEl();
       if (!el || !document.getElementById("gow-inline-warning")) return;
       const rect = el.getBoundingClientRect();
-
-      if (showBelow) {
-        
-        bar.style.top = (rect.bottom + 6) + "px";
-        bar.style.transform = "";
-      } else {
-        // Float above the input field (all other sites)
-        bar.style.top = (rect.top - 8) + "px";
-        bar.style.transform = "translateY(-100%)";
-      }
-      bar.style.left = rect.left + "px";
+      bar.style.top   = (rect.bottom + 6) + "px";
+      bar.style.left  = rect.left + "px";
       bar.style.width = rect.width + "px";
-      bar.style.height = "";
-      bar.style.borderRadius = "8px";
-
-      repositionRAF = requestAnimationFrame(positionBar);
+      repositionRAF = requestAnimationFrame(positionBar); // FIX 8: continuous reposition
     }
     positionBar();
 
-    
+    // Auto-remove after 8s
     setTimeout(removeInlineWarning, 8000);
   }
 
@@ -152,144 +107,96 @@
     if (repositionRAF) { cancelAnimationFrame(repositionRAF); repositionRAF = null; }
   }
 
-  let tesseractReady = false;
-  let tesseractLoading = false;
+  // ════════════════════════════════════════
+  //  IMAGE OCR
+  //  Tesseract loaded via background SW fetch
+  //  — bypasses site Content-Security-Policy
+  // ════════════════════════════════════════
 
-  
-  function safeSendMessage(msg) {
-    try {
-      if (!chrome?.runtime?.id) return Promise.resolve(null);
-      return chrome.runtime.sendMessage(msg).catch(() => null);
-    } catch (_) {
-      return Promise.resolve(null);
-    }
-  }
+  let tesseractReady  = false;
+  let tesseractWorker = null;
+  let tesseractLoading = false;
 
   async function initTesseract() {
     if (tesseractReady || tesseractLoading) return;
     tesseractLoading = true;
 
     try {
-      const resp = await safeSendMessage({ type: "INIT_OCR" });
-      console.log("[GuardOWL] INIT_OCR response:", JSON.stringify(resp));
-      if (!resp?.ok) throw new Error(resp?.error || "Init failed (no error detail in response)");
+      // Ask background SW to fetch+cache Tesseract bundle
+      // Background fetch is NOT subject to page CSP
+      const resp = await chrome.runtime.sendMessage({ type: "FETCH_TESSERACT" });
+      if (!resp?.ok) throw new Error("Background fetch failed");
 
-      tesseractReady = true;
+      // Inject the script text via blob URL (bypasses CSP)
+      const blob   = new Blob([resp.scriptText], { type: "application/javascript" });
+      const blobUrl = URL.createObjectURL(blob);
+      await loadScriptFromBlob(blobUrl);
+      URL.revokeObjectURL(blobUrl);
+
+      tesseractWorker = await Tesseract.createWorker("eng");
+      tesseractReady   = true;
       tesseractLoading = false;
-      console.log("[GuardOWL] Tesseract OCR ready (offscreen)");
+      console.log("[GuardOWL] Tesseract OCR ready");
     } catch (err) {
       tesseractLoading = false;
-      console.warn("[GuardOWL] Tesseract offscreen init failed:", err.message);
+      console.warn("[GuardOWL] Tesseract init failed:", err.message);
     }
   }
 
-  
-
-  function preprocessCanvas(sourceCanvas) {
-    const w = sourceCanvas.width, h = sourceCanvas.height;
-    const dst = document.createElement("canvas");
-    dst.width = w; dst.height = h;
-    const ctx = dst.getContext("2d");
-    ctx.drawImage(sourceCanvas, 0, 0);
-
-    const imgData = ctx.getImageData(0, 0, w, h);
-    const d = imgData.data;
-
-    
-    for (let i = 0; i < d.length; i += 4) {
-      const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-      d[i] = d[i + 1] = d[i + 2] = gray;
-    }
-
-    
-    let min = 255, max = 0;
-    for (let i = 0; i < d.length; i += 4) {
-      if (d[i] < min) min = d[i];
-      if (d[i] > max) max = d[i];
-    }
-    const range = max - min || 1;
-    for (let i = 0; i < d.length; i += 4) {
-      const stretched = ((d[i] - min) / range) * 255;
-      d[i] = d[i + 1] = d[i + 2] = stretched;
-    }
-
-    
-    let sum = 0, count = 0;
-    for (let i = 0; i < d.length; i += 4) { sum += d[i]; count++; }
-    const threshold = sum / count;
-    for (let i = 0; i < d.length; i += 4) {
-      const val = d[i] > threshold ? 255 : 0;
-      d[i] = d[i + 1] = d[i + 2] = val;
-    }
-
-    ctx.putImageData(imgData, 0, 0);
-    return dst;
+  function loadScriptFromBlob(blobUrl) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src     = blobUrl;
+      s.onload  = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
   }
 
   async function scanImageFromClipboard(imageBlob) {
-    isModalOpen = true;
-    showOCRToast("Scanning image for sensitive data...", "#8E8E93");
+    showOCRToast("🦉 Scanning image for sensitive data...", "#8E8E93");
 
     try {
       const bitmap = await createImageBitmap(imageBlob);
       const canvas = document.createElement("canvas");
-      canvas.width = bitmap.width;
+      canvas.width  = bitmap.width;
       canvas.height = bitmap.height;
       canvas.getContext("2d").drawImage(bitmap, 0, 0);
 
       if (!tesseractReady) await initTesseract();
       if (!tesseractReady) {
-        isModalOpen = false;
-        showOCRToast("OCR engine unavailable — image not scanned", "#FF9500");
+        showOCRToast("⚠️ OCR engine unavailable — image not scanned", "#FF9500");
         return;
       }
 
-      
-      const originalData = canvas.toDataURL("image/png");
-      const processedCanvas = preprocessCanvas(canvas);
-      const processedData = processedCanvas.toDataURL("image/png");
+      const { data: { text } } = await tesseractWorker.recognize(canvas);
 
-      console.log("[GuardOWL] Running multi-pass OCR (original + preprocessed)...");
-
-      const [resp1, resp2] = await Promise.all([
-        safeSendMessage({ type: "DO_OCR", imageData: originalData }),
-        safeSendMessage({ type: "DO_OCR", imageData: processedData })
-      ]);
-
-      const text1 = resp1?.ok ? (resp1.text || "") : "";
-      const text2 = resp2?.ok ? (resp2.text || "") : "";
-
-      // Merge: use the longer text or combine both (deduplication happens in scan)
-      const combinedText = text1.length >= text2.length
-        ? text1 + "\n" + text2
-        : text2 + "\n" + text1;
-
-      console.log("[GuardOWL] OCR pass 1:", text1.length, "chars | pass 2:", text2.length, "chars");
-
-      if (!combinedText || combinedText.trim().length < 4) {
-        isModalOpen = false;
-        showOCRToast("Image scanned — no readable text found", "#30D158");
+      if (!text || text.trim().length < 4) {
+        showOCRToast("✓ Image scanned — no readable text found", "#30D158");
         return;
       }
 
-      const findings = guardOwlScan(combinedText, userSettings.disabledPatterns || []);
+      const findings = guardOwlScan(text);
       if (findings.length === 0) {
-        isModalOpen = false;
-        showOCRToast("Image scanned — no sensitive data detected", "#30D158");
+        showOCRToast("✓ Image scanned — no sensitive data detected", "#30D158");
         return;
       }
 
       removeOCRToast();
-      guardOwlShowModal(findings, combinedText, (action) => {
+      isModalOpen = true;
+
+      // FIX 11: image mode callback does NOT call clearInput()
+      guardOwlShowModal(findings, text, (action) => {
         isModalOpen = false;
         if (action === "remove") logDetection(findings, "blocked");
-        if (action === "send") logDetection(findings, "ignored");
+        if (action === "send")   logDetection(findings, "ignored");
+        // no clearInput() here — image was pasted, not text
       }, true);
 
     } catch (err) {
-      isModalOpen = false;
+      isModalOpen = false; // safety reset
       console.warn("[GuardOWL] OCR error:", err);
-      showOCRToast("Could not process image", "#FF9500");
+      showOCRToast("⚠️ Could not process image", "#FF9500");
     }
   }
 
@@ -306,54 +213,50 @@
     `;
     toast.textContent = msg;
     document.body.appendChild(toast);
-    
-    const delay = color === "#30D158" ? 3000 : 6000;
-    setTimeout(removeOCRToast, delay);
+    if (color === "#30D158") setTimeout(removeOCRToast, 3000);
   }
 
   function removeOCRToast() { document.getElementById("gow-ocr-toast")?.remove(); }
 
+  // ════════════════════════════════════════
+  //  PASTE HANDLER
+  // ════════════════════════════════════════
+
   async function handlePaste(e) {
-    if (isWhitelisted() || isSiteDisabled()) return;
     const items = e.clipboardData?.items;
-    if (!items) { console.log("[GuardOWL] Paste: no clipboardData items"); return; }
+    if (!items) return;
 
-    console.log("[GuardOWL] Paste detected, items:", [...items].map(i => i.type).join(", "));
-
-    
-    if (userSettings.ocrEnabled !== false) {
-      for (const item of items) {
-        if (item.type.startsWith("image/")) {
-          const blob = item.getAsFile();
-          console.log("[GuardOWL] Image found in paste, blob size:", blob?.size);
-          if (blob) { scanImageFromClipboard(blob); return; }
-        }
+    // Image paste → OCR
+    for (const item of items) {
+      if (item.type.startsWith("image/")) {
+        const blob = item.getAsFile();
+        if (blob) { scanImageFromClipboard(blob); return; }
       }
-    } else {
-      console.log("[GuardOWL] OCR disabled in settings");
     }
 
-    
+    // Text paste → scan → inline warning (non-blocking)
     const pastedText = e.clipboardData.getData("text") || "";
     if (!pastedText || pastedText.trim().length < 4) return;
 
-    const findings = guardOwlScan(pastedText, userSettings.disabledPatterns || []);
+    const findings = guardOwlScan(pastedText);
     if (findings.length === 0) return;
 
+    // Let paste land in DOM first, then show bar
     requestAnimationFrame(() => highlightPIIInInput(findings));
   }
 
-  // ─ SUBMIT INTERCEPTION ─
+  // ════════════════════════════════════════
+  //  SUBMIT INTERCEPTION
+  // ════════════════════════════════════════
 
   function handleSubmitAttempt(e) {
-    if (isWhitelisted()) return;
     if (skipNextScan) { skipNextScan = false; return; }
-    if (isModalOpen) { e.preventDefault(); e.stopPropagation(); return; }
+    if (isModalOpen)  { e.preventDefault(); e.stopPropagation(); return; }
 
     const text = getInputText();
     if (!text || text.trim().length < 3) return;
 
-    const findings = guardOwlScan(text, userSettings.disabledPatterns || []);
+    const findings = guardOwlScan(text);
     if (findings.length === 0) {
       removeInlineWarning();
       logCleanSend();
@@ -389,36 +292,21 @@
     }
   }
 
+  // ════════════════════════════════════════
+  //  STORAGE
+  // ════════════════════════════════════════
 
   function logDetection(findings, outcome) {
     chrome.storage.local.get(["gow_stats", "gow_log"], (data) => {
       const stats = data.gow_stats || { total_blocked: 0, total_masked: 0, total_ignored: 0 };
-      let log = data.gow_log || [];
-
+      const log   = data.gow_log   || [];
       if (outcome === "blocked") stats.total_blocked++;
-      if (outcome === "masked") stats.total_masked++;
+      if (outcome === "masked")  stats.total_masked++;
       if (outcome === "ignored") stats.total_ignored++;
-
-
-      const safeTypes = findings.map(f => btoa(f.label).slice(0, 8)); 
-      log.unshift({
-        ts: Date.now(),
-        site: hostname,
-        outcome,
-        types: safeTypes,           
-        severity: findings[0]?.severity
-        
-      });
+      log.unshift({ ts: Date.now(), site: hostname, outcome, types: findings.map(f => f.label), severity: findings[0]?.severity });
       if (log.length > 100) log.length = 100;
-
-      
-      if (userSettings.autoPurge !== false) {
-        const cutoff = Date.now() - (24 * 60 * 60 * 1000);
-        log = log.filter(entry => entry.ts > cutoff);
-      }
-
       chrome.storage.local.set({ gow_stats: stats, gow_log: log });
-      try { safeSendMessage({ type: "UPDATE_BADGE", count: stats.total_blocked }); } catch (_) { }
+      try { chrome.runtime.sendMessage({ type: "UPDATE_BADGE", count: stats.total_blocked }); } catch (_) {}
     });
   }
 
@@ -430,6 +318,9 @@
     });
   }
 
+  // ════════════════════════════════════════
+  //  INIT
+  // ════════════════════════════════════════
 
   function injectStyles() {
     if (document.getElementById("gow-anim-styles")) return;
@@ -439,31 +330,10 @@
     document.head.appendChild(s);
   }
 
-  
-  let inputScanTimer = null;
-  function handleInput() {
-    if (isWhitelisted() || isSiteDisabled()) return;
-    clearTimeout(inputScanTimer);
-    inputScanTimer = setTimeout(() => {
-      const text = getInputText();
-      if (!text || text.trim().length < 3) { removeInlineWarning(); return; }
-      const findings = guardOwlScan(text, userSettings.disabledPatterns || []);
-      if (findings.length === 0) { removeInlineWarning(); return; }
-      highlightPIIInInput(findings);
-    }, 400); 
-  }
-
   function attachListeners() {
     injectStyles();
-
-    document.removeEventListener("keydown", handleKeydown, true);
-    document.removeEventListener("paste", handlePaste, true);
-    document.removeEventListener("drop", handleDrop, true);
-    document.removeEventListener("input", handleInput, true);
     document.addEventListener("keydown", handleKeydown, true);
-    document.addEventListener("paste", handlePaste, true);
-    document.addEventListener("drop", handleDrop, true);
-    document.addEventListener("input", handleInput, true);
+    document.addEventListener("paste",   handlePaste,   true);
 
     const observer = new MutationObserver(() => {
       const btn = getSubmitBtn();
@@ -471,77 +341,21 @@
         btn.__gow_hooked = true;
         btn.addEventListener("click", handleSubmitAttempt, true);
       }
-      
-      hookFileInputs();
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
     const btn = getSubmitBtn();
     if (btn) { btn.__gow_hooked = true; btn.addEventListener("click", handleSubmitAttempt, true); }
-    hookFileInputs();
 
-    
-    const ocrSites = ["chatgpt.com", "chat.openai.com", "claude.ai", "gemini.google.com", "copilot.microsoft.com", "www.bing.com"];
-    if (ocrSites.includes(hostname)) {
-      setTimeout(initTesseract, 5000);
-    }
-  }
-
-  
-
-  function hookFileInputs() {
-    document.querySelectorAll('input[type="file"]').forEach(input => {
-      if (input.__gow_hooked) return;
-      input.__gow_hooked = true;
-      input.addEventListener("change", handleFileUpload, true);
-    });
-  }
-
-  function handleFileUpload(e) {
-    if (isWhitelisted() || isSiteDisabled()) return;
-    if (userSettings.ocrEnabled === false) return;
-    const files = e.target?.files;
-    if (!files) return;
-    for (const file of files) {
-      if (file.type.startsWith("image/")) {
-        console.log("[GuardOWL] Image upload detected:", file.name, file.size, "bytes");
-        scanImageFromClipboard(file);
-        return;
-      }
-    }
-  }
-
-  function handleDrop(e) {
-    if (isWhitelisted() || isSiteDisabled()) return;
-    if (userSettings.ocrEnabled === false) return;
-    const files = e.dataTransfer?.files;
-    if (!files) return;
-    for (const file of files) {
-      if (file.type.startsWith("image/")) {
-        console.log("[GuardOWL] Image drag-drop detected:", file.name, file.size, "bytes");
-        scanImageFromClipboard(file);
-        return;
-      }
-    }
-  }
-
-
-  function hookSPANavigation() {
-    const origPushState = history.pushState.bind(history);
-    history.pushState = function (...args) {
-      origPushState(...args);
-      setTimeout(attachListeners, 600);
-    };
-    window.addEventListener("popstate", () => setTimeout(attachListeners, 600));
+    // Pre-warm Tesseract 5s after load
+    setTimeout(initTesseract, 5000);
   }
 
   if (config) {
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", () => { attachListeners(); hookSPANavigation(); });
-    } else {
-      attachListeners();
-      hookSPANavigation();
-    }
+    document.readyState === "loading"
+      ? document.addEventListener("DOMContentLoaded", attachListeners)
+      : attachListeners();
   }
 
 })();
+// done!
