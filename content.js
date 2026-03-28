@@ -206,7 +206,7 @@
   }
 
   async function scanImageFromClipboard(imageBlob) {
-    showOCROverlay("🦉 Scanning image for sensitive data...", "#8E8E93");
+    showOCROverlay("Scanning image for sensitive data...", "#8E8E93");
 
     try {
       const bitmap = await createImageBitmap(imageBlob);
@@ -238,13 +238,13 @@
         : text2 + "\n" + text1;
 
       if (!combinedText || combinedText.trim().length < 4) {
-        showOCROverlay("✓ Image scanned — no readable text found", "#30D158");
+        showOCROverlay("Image scanned — no readable text found", "#30D158");
         return;
       }
 
       const findings = guardOwlScan(combinedText, userSettings.disabledPatterns || []);
       if (findings.length === 0) {
-        showOCROverlay("✓ Image scanned — no sensitive data detected", "#30D158");
+        showOCROverlay("Image scanned — no sensitive data detected", "#30D158");
         return;
       }
 
@@ -305,7 +305,7 @@
     }
     positionOverlay();
 
-    if (color === "#30D158") setTimeout(removeOCROverlay, 3000);
+    if (color === "#30D158" || color === "#FF9500") setTimeout(removeOCROverlay, 3500);
   }
 
   function removeOCROverlay() {
@@ -407,6 +407,7 @@
   }
 
   function logDetection(findings, outcome) {
+    if (!chrome?.storage?.local) return;
     chrome.storage.local.get(["gow_stats", "gow_log"], (data) => {
       const stats = data.gow_stats || { total_blocked: 0, total_masked: 0, total_ignored: 0 };
       let log = data.gow_log || [];
@@ -414,7 +415,7 @@
       if (outcome === "masked") stats.total_masked++;
       if (outcome === "ignored") stats.total_ignored++;
 
-      const safeTypes = findings.map(f => btoa(f.label).slice(0, 8)); 
+      const safeTypes = findings.map(f => btoa(f.label).slice(0, 8));
       log.unshift({
         ts: Date.now(),
         site: hostname,
@@ -435,6 +436,7 @@
   }
 
   function logCleanSend() {
+    if (!chrome?.storage?.local) return;
     chrome.storage.local.get("gow_stats", (data) => {
       const stats = data.gow_stats || {};
       stats.clean_sends = (stats.clean_sends || 0) + 1;
@@ -460,7 +462,7 @@
       const findings = guardOwlScan(text, userSettings.disabledPatterns || []);
       if (findings.length === 0) { removeInlineWarning(); return; }
       highlightPIIInInput(findings);
-    }, 400); 
+    }, 400);
   }
 
   function hookFileInputs() {

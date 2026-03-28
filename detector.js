@@ -1,20 +1,17 @@
-
-
-
 const GUARDOWL_PATTERNS = [
 
-  
+
   {
     id: "anthropic_key",
     label: "Anthropic API Key",
     severity: "critical",
-    pattern: /sk-ant-[a-zA-Z0-9\-_]{32,}/g   
+    pattern: /sk-ant-[a-zA-Z0-9\-_]{32,}/g
   },
   {
     id: "openai_key",
     label: "OpenAI API Key",
     severity: "critical",
-    pattern: /sk-(?!ant-)[a-zA-Z0-9\-_]{32,}/g   
+    pattern: /sk-(?!ant-)[a-zA-Z0-9\-_]{32,}/g
   },
   {
     id: "aws_access_key",
@@ -50,11 +47,11 @@ const GUARDOWL_PATTERNS = [
     id: "jwt_token",
     label: "JWT Token",
     severity: "critical",
-    
+
     pattern: /eyJ[A-Za-z0-9\-_]{10,}\.eyJ[A-Za-z0-9\-_]{10,}\.[A-Za-z0-9\-_.+/]{10,}/g
   },
 
-  
+
   {
     id: "private_key",
     label: "Private Key (PEM)",
@@ -65,7 +62,7 @@ const GUARDOWL_PATTERNS = [
     id: "password_inline",
     label: "Inline Password",
     severity: "high",
-    
+
     pattern: /(?:password|passwd|pwd)\s*[:=]\s*\S{6,}/gi
   },
   {
@@ -75,12 +72,12 @@ const GUARDOWL_PATTERNS = [
     pattern: /(mongodb(\+srv)?|postgres|postgresql|mysql|redis):\/\/[^:]+:[^@]+@[^\s]+/gi
   },
 
-  
+
   {
     id: "aadhaar",
     label: "Aadhaar Number",
     severity: "critical",
-    
+
     pattern: /(?<!\d)[2-9]\d{3}[\s\-]?\d{4}[\s\-]?\d{4}(?!\d)/g,
     validate: (m) => m.replace(/[\s\-]/g, "").length === 12  // must be exactly 12 digits
   },
@@ -88,23 +85,23 @@ const GUARDOWL_PATTERNS = [
     id: "pan_card",
     label: "PAN Card Number",
     severity: "critical",
-    
+
     pattern: /\b[A-Z]{3}[ABCFGHLJPTF][A-Z]\d{4}[A-Z]\b/g
   },
   {
     id: "india_phone",
     label: "Indian Phone Number",
     severity: "medium",
-    
+
     pattern: /(?<!\d)(?:\+91[\s\-]?)?[6-9]\d{9}(?!\d)/g,
     validate: (m) => {
-      
+
       const digits = m.replace(/[\s\-+]/g, "");
       return digits.length === 10 || (digits.startsWith("91") && digits.length === 12);
     }
   },
 
-  
+
   {
     id: "credit_card",
     label: "Credit / Debit Card Number",
@@ -116,12 +113,12 @@ const GUARDOWL_PATTERNS = [
     id: "ifsc_code",
     label: "Bank IFSC Code",
     severity: "medium",
-    
+
     pattern: /\b[A-Z]{4}0[A-Z0-9]{6}\b/g,
     validate: (m) => /^[A-Z]{4}0[A-Z0-9]{6}$/.test(m) && m.length === 11
   },
 
-  
+
   {
     id: "ipv4_private",
     label: "Private IP Address",
@@ -129,15 +126,15 @@ const GUARDOWL_PATTERNS = [
     pattern: /\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})\b/g
   },
 
-  
+
   {
     id: "email",
     label: "Email Address",
     severity: "low",
-    
+
     pattern: /\b[a-zA-Z0-9._%+\-]{2,}@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}\b/g,
     validate: (m) => {
-      
+
       const placeholders = ["example.com", "test.com", "test.org", "foo.com", "bar.com", "sample.com", "email.com"];
       return !placeholders.some(p => m.toLowerCase().endsWith(p));
     }
@@ -146,7 +143,7 @@ const GUARDOWL_PATTERNS = [
     id: "ssn",
     label: "Social Security Number (SSN)",
     severity: "critical",
-    
+
     pattern: /\b(?!000|666|9\d{2})\d{3}-(?!00)\d{2}-(?!0000)\d{4}\b/g
   }
 ];
@@ -188,12 +185,12 @@ function guardOwlScan(text, disabledCategories = []) {
     }
   }
 
-  
+
   const seen = new Map();
   for (const f of findings) {
     if (!seen.has(f.id)) seen.set(f.id, f);
   }
-  
+
   const hasCritical = [...seen.values()].some(f => f.severity === "critical");
   if (!hasCritical) {
     for (const f of entropyCheck(text)) {
@@ -201,12 +198,12 @@ function guardOwlScan(text, disabledCategories = []) {
     }
   }
 
-  
+
   for (const f of contextScan(text)) {
     if (!seen.has(f.id)) seen.set(f.id, f);
   }
 
-  
+
   for (const f of nlpScan(text)) {
     if (!seen.has(f.id)) seen.set(f.id, f);
   }
@@ -254,9 +251,6 @@ function entropyCheck(text) {
   return [];
 }
 
-// ════════════════════════════════════════
-//  LAYER 3 — Context-window regex
-// ════════════════════════════════════════
 
 const CONTEXT_PATTERNS = [
   {
@@ -297,29 +291,12 @@ function contextScan(text) {
   return findings;
 }
 
-// ════════════════════════════════════════
-//  LAYER 4 — compromise.js NER
-//  nlp is injected by content.js after fetch
-// ════════════════════════════════════════
 
-// Use the global nlp function from compromise.min.js (loaded as a content script)
-// If compromise isn't loaded, nlpScan() gracefully returns [].
 function nlpScan(text) {
   if (!nlp) return [];
   const findings = [];
   try {
     const doc = nlp(text);
-
-    const people = doc.people().out("array");
-    if (people.length > 0) {
-      findings.push({
-        id: "nlp_person_name",
-        label: "Person name (NLP)",
-        severity: "medium",
-        match: people[0],
-        index: text.indexOf(people[0])
-      });
-    }
 
     const phones = doc.phoneNumbers?.().out("array") || [];
     if (phones.length > 0) {
@@ -332,7 +309,7 @@ function nlpScan(text) {
       });
     }
 
-    const orgs = doc.organizations().out("array");
+    const orgs = doc.organizations().out("array").filter(o => o.length >= 5 && /^[A-Za-z0-9\s]+$/.test(o));
     if (orgs.length > 0 && text.length > 100) {
       findings.push({
         id: "nlp_org",
@@ -342,6 +319,6 @@ function nlpScan(text) {
         index: text.indexOf(orgs[0])
       });
     }
-  } catch (_) {}
+  } catch (_) { }
   return findings;
 }
