@@ -80,13 +80,42 @@ flowchart LR
     R --> S[Local Activity Logs]
 ```
 
-### The 4-Layer Text Pipeline 
-1. **Context-Aware Regex:** 15+ patterns catch standard tokens (`sk-`, `AKIA`).
-2. **Shannon Entropy Validation:** Mathematical randomness checks to find unknown secrets/hashes.
-3. **Context Window:** Scans for anchors (`password=`, `token:`) right next to high-entropy strings.
-4. **NLP Entity Extraction:** Bundled `compromise.min.js` detects structural lists of Human Names, Organizations, and Phone Numbers.
+### 🧠 The 4-Layer Text Pipeline 
 
-### The Image OCR Pipeline
+Most basic security tools just parse raw text using standard Regex. That creates massive false positives or completely misses modern cryptographic tokens. Instead, GuardOWL pipes every single payload right here through a rigorous 4-Layer waterfall.
+
+1. **Layer 1: High-Fidelity Regex Checksums**: We look for highly structured financial and identity tokens (Aadhaar, SSN, Credit Cards). But we don't just match numbers—we execute mathematical checksum algorithms (like Luhn for cards) to guarantee a 0% false positive rate.
+2. **Layer 2: Shannon Entropy Validation**: Zero-day API tokens and cryptographic hashes don't look like standard regex patterns. So, we run a Shannon Entropy probability formula on raw text. If a random character string crosses a mathematical entropy density threshold of 4.5 bits/char, we identify it as a cryptographic secret.
+3. **Layer 3: Contextual Slider**: To prevent false-alerting on random IDs, we run a sliding context window. If the engine sees a high-entropy string, it checks the immediate <15 preceding characters for dangerous anchor words like `password=`, `auth_token:`, or `db_endpoint=`.
+4. **Layer 4: On-Device Natural Language Processing**: Finally, to catch unstructured data that Regex simply cannot understand, the text is fed into a locally bundled NLP intelligence library (`compromise.min.js`). It reads the text mathematically and extracts Organization Names and hidden phone numbers using Named Entity Recognition.
+
+```mermaid
+flowchart TD
+
+    Input["Raw Prompt / OCR Extracted Text"] --> GuardOWL
+
+    GuardOWL["GuardOWL"] --> Layer1
+
+    subgraph Engine[" "]
+    
+        Layer1["Layer 1: High-Fidelity Regex Detection"]
+        Layer1 --> Layer2["Layer 2: Shannon Entropy Analysis"]
+        Layer2 --> Layer3["Layer 3: Contextual Keyword Window"]
+        Layer3 --> Layer4["Layer 4: Local Named Entity Recognition"]
+
+        Layer1 -->|"Structured Pattern Matches"| Aggregation
+        Layer2 -->|"High-Randomness Token Signals"| Aggregation
+        Layer3 -->|"Context Anchors (password=, token=)"| Aggregation
+        Layer4 -->|"Detected Personal / Organization Entities"| Aggregation
+
+    end
+
+    Aggregation["Compile Detection Signals"] --> Sanitizer["Deduplicate Results & Assign Severity Score"]
+
+    Sanitizer --> Output["Final Verdict:<br>Block / Mask / Allow"]
+```
+
+### 👁️ The Image OCR Pipeline
 Paste a screenshot of an API key or a photo of a PAN card?
 1. **Canvas Preprocessing:** Image is drawn onto an HTML5 canvas where we manipulate the `Uint8ClampedArray` to apply Grayscale scaling, Histogram Contrast Stretching, and Adaptive Binary Thresholding to strip out background noise/watermarks.
 2. **Multi-Pass OCR:** Original and preprocessed images are sent to our **Offscreen Document**.
