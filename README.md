@@ -35,14 +35,49 @@ Enterprise tools like Nightfall AI ($3K–$15K/month) scan your data on *their* 
 
 GuardOWL uses a strict 100% on-device architecture engineered to survive modern strict CSPs (Content Security Policies).
 
-```
-You type, paste, drag-and-drop, or upload a file containing an API key / Aadhaar / password
-                                        ↓
-GuardOWL content script intercepts the DOM event (keyup, paste, drop, form click)
-                                        ↓
-           e.preventDefault() — send STOPPED before browser processes it
-                                        ↓
-            Payload enters detection pipeline (Text or Preprocessed Image)
+```mermaid
+flowchart LR
+    A[User] --> B[Chat Platform UI<br>ChatGPT / Claude / Gemini]
+
+    B --> C[GuardOWL Content Script]
+
+    C --> D[Input Interceptor]
+    D --> E[Debounce Buffer<br>400ms]
+
+    E --> F[GuardOWL Detection Engine]
+
+    F --> G1[Regex Engine<br>API Keys, Cards, Aadhaar]
+    F --> G2[Entropy Scanner<br>Random Token Detection]
+    F --> G3[Context Analyzer<br>password= token= etc]
+    F --> G4[NLP Entity Detection<br>Names, Phones, Orgs]
+
+    C --> H[Image Paste Handler]
+
+    H --> I[OCR Module<br>WebAssembly OCR]
+    H --> J[Document Classifier<br>MobileNetV2 Model]
+
+    I --> F
+    J --> F
+
+    F --> K{Sensitive Data Found?}
+
+    K -->|No| L[Allow Submit]
+    K -->|Yes| M[Warning Modal]
+
+    M --> N[User Options]
+
+    N --> O1[Block]
+    N --> O2[Mask & Send]
+    N --> O3[Send Anyway]
+
+    O2 --> P[Masking Engine<br>Redact Sensitive Tokens]
+
+    P --> Q[Release Sanitized Text]
+
+    L --> R[Dashboard]
+    Q --> R
+
+    R --> S[Local Activity Logs]
 ```
 
 ### The 4-Layer Text Pipeline 
@@ -135,10 +170,10 @@ guardowl/
 
 | | Nightfall AI ($$M) | Cyberhaven (Enterprise) | GuardOWL (Edge DLP) |
 |---|---|---|---|
-| Detection location | Their cloud server  | Their cloud server  | **Your device sandbox ✓** |
+| Detection location | Their cloud server  | Their cloud server  | **Your device sandbox** |
 | Sees your true data | Yes | Yes | **Never** |
-| Target demographic | InfoSec IT Admins | Enterprise Endpoints | **Individuals & Devs ✓** |
-| Installation | Network routing setup | Root-level IT agent | **30 second extension ✓** |
+| Target demographic | InfoSec IT Admins | Enterprise Endpoints | **Individuals & Devs** |
+| Installation | Network routing setup | Root-level IT agent | **30 second extension** |
 
 ---
 
