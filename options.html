@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>GuardOWL Settings</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <img src="icons/icon48.png" width="40" height="40" alt="GuardOWL" class="logo-img" />
+      <div>
+        <h1>GuardOWL Settings</h1>
+        <p class="subtitle">Observe · Warn · Lock</p>
+      </div>
+    </header>
+
+    <!-- Sensitivity Level -->
+    <section class="card">
+      <h2>Detection Sensitivity</h2>
+      <p class="desc">How aggressively GuardOWL flags content before sending.</p>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" name="sensitivity" value="strict" />
+          <div class="radio-content">
+            <span class="radio-title">Strict</span>
+            <span class="radio-desc">Flags all categories including email and medium-severity items</span>
+          </div>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="sensitivity" value="balanced" checked />
+          <div class="radio-content">
+            <span class="radio-title">Balanced <span class="badge-recommended">Recommended</span></span>
+            <span class="radio-desc">Flags critical and high severity only — skips emails and private IPs</span>
+          </div>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="sensitivity" value="minimal" />
+          <div class="radio-content">
+            <span class="radio-title">Minimal</span>
+            <span class="radio-desc">Critical only — API keys, credentials, Aadhaar, PAN, cards</span>
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <!-- Pattern Toggles — grouped categories -->
+    <section class="card">
+      <h2>Detection Categories</h2>
+      <p class="desc">Click a category to expand and toggle individual rules.</p>
+      <div id="pattern-groups"></div>
+    </section>
+
+    <!-- Whitelist -->
+    <section class="card">
+      <h2>Site Whitelist</h2>
+      <p class="desc">GuardOWL will stay silent on these domains. One domain per line (e.g.
+        <code>internal.company.com</code>).</p>
+      <textarea id="whitelist-input" placeholder="internal.company.com&#10;localhost&#10;staging.myapp.com"
+        rows="5"></textarea>
+    </section>
+
+    <!-- Privacy -->
+    <section class="card">
+      <h2>Privacy &amp; Data</h2>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Auto-purge old logs</div>
+          <div class="toggle-sub">Automatically delete detection logs older than 24 hours</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-autopurge" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">OCR image scanning</div>
+          <div class="toggle-sub">Scan pasted screenshots for sensitive text (uses Tesseract.js on-device)</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-ocr" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Expansion features — off by default -->
+      <div class="section-label" style="margin-top:20px; font-weight: bold; color: #E5E5EA; padding-bottom: 5px; border-bottom: 1px solid #2A2A38; margin-bottom: 10px;">Experimental — Off by default</div>
+      
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Gmail Compose Protection</div>
+          <div class="toggle-sub">Scan emails before sending · Requires mail.google.com permission</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-gmail" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Google Search Protection</div>
+          <div class="toggle-sub">Warn if you search sensitive data · Requires google.com permission</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-google-search" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <button class="btn-danger" id="btn-wipe">Wipe All Data</button>
+    </section>
+
+    <div class="actions">
+      <button class="btn-save" id="btn-save">Save Settings</button>
+      <span class="save-status" id="save-status"></span>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+
+</html>

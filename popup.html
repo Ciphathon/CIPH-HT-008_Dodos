@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+  <link rel="stylesheet" href="popup.css" />
+  <title>GuardOWL</title>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <img src="icons/icon48.png" width="36" height="36" alt="GuardOWL" style="border-radius:8px;flex-shrink:0;" />
+    <div>
+      <div class="brand">Guard<span>OWL</span></div>
+      <div class="tagline">Observe · Warn · Lock</div>
+    </div>
+    <div class="header-icons">
+      <div class="status-dot" id="status-dot" title="Active on this site"></div>
+      <div class="ocr-dot" id="ocr-dot" title="OCR engine warming up...">OCR</div>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-number" id="stat-blocked">0</div>
+      <div class="stat-label">Blocked</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number masked" id="stat-masked">0</div>
+      <div class="stat-label">Masked</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number ignored" id="stat-ignored">0</div>
+      <div class="stat-label">Ignored</div>
+    </div>
+  </div>
+
+  <!-- Log header -->
+  <div class="section-header">
+    <div class="section-title">Recent detections</div>
+    <div class="log-actions">
+      <button class="btn-link" id="btn-export" title="Export log as JSON">Export</button>
+      <button class="btn-link danger" id="btn-clear" title="Clear detection log">Clear</button>
+    </div>
+  </div>
+
+  <div class="log-list" id="log-list">
+    <div class="log-empty">No detections yet — you&apos;re safe</div>
+  </div>
+
+  <div class="footer">
+    <a href="#" id="btn-settings" title="Open settings">Settings</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

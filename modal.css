@@ -1,0 +1,250 @@
+/* ═══════════════════════════════════════════════
+   GuardOWL — Modal Styles
+   ═══════════════════════════════════════════════ */
+
+#guardowl-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  backdrop-filter: blur(3px);
+}
+
+#guardowl-modal {
+  background: #16161E;
+  border: 1px solid #2A2A38;
+  border-radius: 16px;
+  width: 420px;
+  max-width: 92vw;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  overflow: hidden;
+  animation: gow-slide-in 0.2s ease;
+}
+
+@keyframes gow-slide-in {
+  from { transform: translateY(-16px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Header */
+.gow-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  background: #1E1E28;
+  border-bottom: 1px solid #2A2A38;
+}
+
+.gow-logo {
+  flex-shrink: 0;
+}
+
+.gow-header-text {
+  flex: 1;
+}
+
+.gow-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.3;
+}
+
+.gow-subtitle {
+  font-size: 12px;
+  color: #8E8E9A;
+  margin-top: 2px;
+}
+
+.gow-close {
+  background: none;
+  border: none;
+  color: #555566;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.gow-close:hover {
+  color: #AAAABC;
+}
+
+/* Findings list */
+.gow-findings-list {
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.gow-finding {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1E1E2A;
+  border: 1px solid #2A2A3A;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.gow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.gow-finding-label {
+  font-size: 13px;
+  color: #CCCCDD;
+  flex: 1;
+  font-weight: 500;
+}
+
+.gow-finding-match {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 11px;
+  color: #666677;
+  background: #12121A;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.gow-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.gow-badge-critical { background: #FF444422; color: #FF4444; }
+.gow-badge-high     { background: #FF950022; color: #FF9500; }
+.gow-badge-medium   { background: #FFD60A22; color: #FFD60A; }
+.gow-badge-low      { background: #8E8E9322; color: #8E8E93; }
+
+/* Divider */
+.gow-divider {
+  height: 1px;
+  background: #2A2A38;
+  margin: 0 20px;
+}
+
+/* Actions */
+.gow-actions {
+  display: flex;
+  gap: 8px;
+  padding: 14px 20px;
+}
+
+.gow-btn {
+  flex: 1;
+  padding: 10px 6px;
+  border: none;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  line-height: 1.3;
+}
+
+.gow-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.gow-btn:active {
+  transform: translateY(0);
+}
+
+.gow-btn-remove {
+  background: #FF4444;
+  color: white;
+}
+
+.gow-btn-mask {
+  background: #FF9500;
+  color: #0F0F13;
+}
+
+.gow-btn-send {
+  background: #2A2A3A;
+  color: #8E8E9A;
+  border: 1px solid #3A3A4A;
+}
+
+/* Footer */
+.gow-footer {
+  text-align: center;
+  font-size: 10px;
+  color: #444455;
+  padding: 0 20px 14px;
+}
+
+/* Image OCR note */
+.gow-img-note {
+  text-align: center;
+  font-size: 11px;
+  color: #555566;
+  padding: 0 20px 6px;
+  font-style: italic;
+}
+
+/* FIX #8: Mask before/after preview */
+.gow-mask-preview {
+  margin: 0 20px 14px;
+  background: #12121A;
+  border: 1px solid #2A2A3A;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gow-preview-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #1E1E2A;
+}
+
+.gow-preview-row:last-child { border-bottom: none; }
+
+.gow-preview-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #555566;
+  min-width: 34px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.gow-preview-text {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 11px;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.gow-preview-before { color: #FF444488; }
+.gow-preview-after  { color: #30D158; }
+
+/* FIX #9: Keyboard focus ring */
+.gow-btn:focus-visible,
+.gow-close:focus-visible {
+  outline: 2px solid #FF9500;
+  outline-offset: 2px;
+}

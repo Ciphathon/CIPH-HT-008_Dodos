@@ -1,0 +1,11 @@
+node_modules/
+dist/
+package-lock.json
+.DS_Store
+Thumbs.db
+*.log
+.gemini/
+.vscode/
+
+# Ignore zip files we created for testing
+*.zip
