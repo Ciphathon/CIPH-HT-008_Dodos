@@ -192,18 +192,6 @@ guardowl/
 ├── tesseract*         Local WebAssembly OCR binaries (Core, Worker JS)
 └── icons/             Extension branding
 ```
-
----
-
-## Why On-Device Matters
-
-| | Nightfall AI ($$M) | Cyberhaven (Enterprise) | GuardOWL (Edge DLP) |
-|---|---|---|---|
-| Detection location | Their cloud server  | Their cloud server  | **Your device sandbox** |
-| Sees your true data | Yes | Yes | **Never** |
-| Target demographic | InfoSec IT Admins | Enterprise Endpoints | **Individuals & Devs** |
-| Installation | Network routing setup | Root-level IT agent | **30 second extension** |
-
 ---
 
 ## Team Dodos
