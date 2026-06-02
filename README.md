@@ -13,7 +13,7 @@
 GuardOWL is a Chrome extension that **intercepts sensitive data before it reaches any AI server**.  
 It runs 100% on your device. No cloud. No subscription. No data ever leaves your browser.
 
-Built in 24 hours at **Ciphathon 26'** — National Cybersecurity Hackathon, MIT-WPU.
+Built under 24 hours at **Ciphathon 26'** — National Cybersecurity Hackathon, MIT-WPU.
 
 ---
 
@@ -27,7 +27,7 @@ In 2023, Samsung engineers leaked proprietary source code by pasting it into Cha
 
 Enterprise tools like Nightfall AI ($3K–$15K/month) scan your data on *their* servers.  Cyberhaven requires an IT-deployed endpoint agent.  Neither works for individual users, students, developers, or small teams.
 
-**GuardOWL does.**
+**GuardOWL does - keeping privacy as first preference**
 
 ---
 
